@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <sstream>
 
 template<typename T>
 class lista_dwukierunkowa {
@@ -21,6 +22,11 @@ public:
             if (nast) {
                 delete nast;
                 nast = nullptr;
+            }
+            
+            if (pop) {
+                delete pop;
+                pop = nullptr;
             }
         }
     };
@@ -54,16 +60,33 @@ public:
         return dlugosc;
     }
 
+    //b)
     void wstaw_na_poczatek(const T& dane) {
         glowa = new wezel_listy(dane, glowa); //nowa glowa
         ++dlugosc;
     }
 
+    // a)
     void wstaw_na_koniec(const T& dane) {
-        ogon = new wezel_listy(dane, ogon); //nowy ogon
+
+        if (glowa == nullptr) {
+            wstaw_na_poczatek(dane);
+            return;
+        }
+
+        ogon = new wezel_listy(dane); //nowy ogon
+        wezel_listy* temp = glowa;
+
+        while (temp->nast != nullptr) {
+            temp = temp->nast;
+        }
+        //temp->nast->pop = temp->nast;
+        temp->nast = ogon;
+        ogon->pop = temp;
         ++dlugosc;
     }
 
+    // d)
     void usun_glowe() {
         wezel_listy* usun = glowa;
 
@@ -87,7 +110,7 @@ public:
 
         dlugosc--;
     }
-
+    // c)
     void usun_ogon() {
         wezel_listy* usun = ogon;
 
@@ -112,6 +135,7 @@ public:
         dlugosc--;
     }
 
+    // e)
     T zwroc_wartosc(unsigned index) {
         if (index <= dlugosc) {
             wezel_listy* temp = glowa;
@@ -127,6 +151,7 @@ public:
         }
     }
 
+    // g)
     template<typename Comp>
     wezel_listy* znajdz_element(const T& el, Comp comp) const
     {
@@ -136,6 +161,7 @@ public:
         return nullptr;
     }
 
+    // f)
     void podmien(unsigned index, const T& dane) {
         if (index <= dlugosc) {
             wezel_listy* temp = glowa;
@@ -144,39 +170,86 @@ public:
                 temp = temp->nast;
             }
 
-            temp.dane = dane;
+            temp->dane = dane;
         }
         else {
             throw std::domain_error("Proba wywolania nieistniejacego elementu.");
         }
     }
 
+
+    // h)
     template<typename Comp>
-    void usun_element(const T& el, Comp comp) const
-    {
+    void usun_element(const T& el, Comp comp) const{
+        bool flag = false;
         for (auto p = glowa; p; p = p->nast)
-            if (comp(el, p->dane)) {
+            if (comp(el, p->dane)){
                 delete p;
                 p = nullptr;
+                flag = true;
                 std::cout << "Element usuniety z powodzeniem\n";
             }
-        std::cout << "Nie udalo sie usunac tego elementu\n"
+        if (flag == false)
+            std::cout << "Nie udalo sie usunac tego elementu\n";
     }
+
+    // i)
+    template<typename Comp>
+    void wstaw_porzadek(const T& el, Comp comp) const {
+        bool flag = false;
+        for (auto p = glowa; p; p = p->nast)
+            if (comp(el, p->dane)){
+                p = new wezel_listy(el, p);
+                flag = true;
+                std::cout << "Element dodany z powodzeniem\n";
+                break;
+            }
+        if (flag == false)
+            std::cout << "Nie udalo sie dodac tego elementu\n";
+    }
+
+    // k)
+    std::string to_string() const
+    {
+        if (dlugosc == 0)
+            return "[]";
+        std::ostringstream str; // pamiętaj o #include <sstream>
+        str << "[" << glowa->dane;
+        for (auto p = glowa->nast; p; p = p->nast)
+            str << ", " << p->dane;
+        str << "]";
+        return str.str(); // wydobycie napisu ze strumienia
+    }
+
+
 };
+
 
 struct some_class {
     int some_int;
     bool operator== (const some_class& obj) const {
         return some_int == obj.some_int;
     };
+
 };
+
+std::ostream& operator<< (std::ostream& out, const some_class& obj)
+{
+    out << obj.some_int;
+    return out;
+}
 
 int main()
 {
     lista_dwukierunkowa<some_class> lista;
     
-    lista.wstaw_na_koniec(some_class{ 123 });
-    lista.wstaw_na_poczatek(some_class{ 'a ' });
+    lista.wstaw_na_koniec(some_class{123});
+    lista.wstaw_na_poczatek(some_class{ 'a' });
+    std::cout << lista.zwroc_wartosc(0) << "\n";
+    std::cout << lista.to_string() << "\n";
+    lista.podmien(1, some_class{ 1234 });
+    std::cout << lista.to_string() << "\n";
+
 
     return 0;
 }
