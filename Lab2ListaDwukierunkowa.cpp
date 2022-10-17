@@ -53,7 +53,7 @@ public:
     // b)
     void push(const T& data) {
         if (length == 0) {
-            head = new Node(data, head);
+            head = new Node(data, tail);
             tail = new Node(data, nullptr, head);
         }
         else if (length == 1) {
@@ -297,67 +297,67 @@ int main()
         return a.some_int == b.some_int;
     };
 
-    //doubly_linked_list<some_class>* list = new doubly_linked_list<some_class>;
-    //list->append(some_class{123});
-    //list->push(some_class{'a'});
+    doubly_linked_list<some_class>* list = new doubly_linked_list<some_class>;
+    list->append(some_class{123});
+    list->push(some_class{'a'});
 
-    //std::cout << list->returnValue(0) << "\n";
+    std::cout << list->returnValue(0) << "\n";
 
-    //std::cout << list->to_string() << "\n";
+    std::cout << list->to_string() << "\n";
 
-    //list->insertAtIndex(1, some_class{ 1234 });
-    //std::cout << list->to_string() << "\n";
+    list->insertAtIndex(1, some_class{ 1234 });
+    std::cout << list->to_string() << "\n";
 
-    //list->insertByComp(some_class{ 100 }, kompLess); // wstawienie z zachowaniem porządku
-    //std::cout << list->to_string() << "\n";
+    list->insertByComp(some_class{ 100 }, kompLess); // wstawienie z zachowaniem porządku
+    std::cout << list->to_string() << "\n";
 
-    //list->find_and_remove(some_class{ 1234 }, kompEq);
-    //std::cout << list->to_string() << "\n";
+    list->find_and_remove(some_class{ 1234 }, kompEq);
+    std::cout << list->to_string() << "\n";
 
-    //std::cout << list->findElement(some_class{ 100 }, kompEq) << "\n";
-    //std::cout << list->to_string() << "\n";
+    std::cout << list->findElement(some_class{ 100 }, kompEq) << "\n";
+    std::cout << list->to_string() << "\n";
 
-    //for (int i = 101; i <= 110; i++)
-    //    list->append(some_class{ i });
-    //std::cout << list->to_string() << "\n";
+    for (int i = 101; i <= 110; i++)
+        list->append(some_class{ i });
+    std::cout << list->to_string() << "\n";
 
-    //list->clear();
-    //std::cout << list->to_string() << "\n";
+    list->clear();
+    std::cout << list->to_string() << "\n";
 
-    const int MAX_ORDER = 6;
-    doubly_linked_list<some_class>* ll = new doubly_linked_list<some_class>();
-    for (int o = 1; o <= MAX_ORDER; o++) {
-        const int n = pow(10, o); // rozmiar danych
-        srand(time(NULL));
+    //const int MAX_ORDER = 6;
+    //doubly_linked_list<some_class>* ll = new doubly_linked_list<some_class>();
+    //for (int o = 1; o <= MAX_ORDER; o++) {
+    //    const int n = pow(10, o); // rozmiar danych
+    //    srand(time(NULL));
 
-        clock_t t1 = clock();
-        for (int i = 0; i < n; i++) {
-            int random = rand() % 10001;
-            some_class so = some_class{ random };
-            ll->append(so);
-        }
-        clock_t t2 = clock();
-        
-        double mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
-        std::cout << ll->border_to_string() << "\nPomiar 1, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff/n << "ms\n\n";
+    //    clock_t t1 = clock();
+    //    for (int i = 0; i < n; i++) {
+    //        int random = rand() % 10001;
+    //        some_class so = some_class{ random };
+    //        ll->append(so);
+    //    }
+    //    clock_t t2 = clock();
+    //    
+    //    double mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
+    //    std::cout << ll->border_to_string() << "\nPomiar 1, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff/n << "ms\n\n";
 
-        const int m = pow(10, 4);
-        
-        t1 = clock();
-        for (int i = 0; i < m; i++) {
-            int random = rand() % 10001;
-            some_class so = some_class{ random };
-            ll->find_and_remove(so, kompEq);
-            so = some_class{NULL};
-        }
+    //    const int m = pow(10, 4);
+    //    
+    //    t1 = clock();
+    //    for (int i = 0; i < m; i++) {
+    //        int random = rand() % 10001;
+    //        some_class so = some_class{ random };
+    //        ll->find_and_remove(so, kompEq);
+    //        so = some_class{NULL};
+    //    }
 
-        t2 = clock();
-        mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
-        std::cout << ll->border_to_string() << "\nPomiar 2, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff / n << "ms\n\n";
+    //    t2 = clock();
+    //    mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
+    //    std::cout << ll->border_to_string() << "\nPomiar 2, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff / n << "ms\n\n";
 
-        ll->clear();
-    }
+    //    ll->clear();
+    //}
 
-    delete ll;
+    //delete ll;
     return 0;
 }
