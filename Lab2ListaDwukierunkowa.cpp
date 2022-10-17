@@ -1,150 +1,141 @@
 ﻿#include <iostream>
 #include <sstream>
+#include <time.h>
 
 template<typename T>
-class lista_dwukierunkowa {
+class doubly_linked_list {
 public:
-    struct wezel_listy {
-        T dane;
-        wezel_listy* nast;
-        wezel_listy* pop;
+    struct Node {
+        T data;
+        Node* next;
+        Node* prev;
 
-        wezel_listy(const T& dane, wezel_listy* nast = nullptr, wezel_listy* pop = nullptr)
-            : dane(dane), nast(nast), pop(pop) {
+        Node(const T& data, Node* next = nullptr, Node* prev = nullptr)
+            : data(data), next(next), prev(prev) {
 
         }
 
-        wezel_listy(T&& dane, wezel_listy* nast = nullptr, wezel_listy* pop = nullptr)
-            : dane(dane), nast(nast), pop(pop) {
+        Node(T&& data, Node* next = nullptr, Node* prev = nullptr)
+            : data(data), next(next), prev(prev) {
         }
 
-        ~wezel_listy() {
-            if (nast) {
-                delete nast;
-                nast = nullptr;
-            }
-            
-            if (pop) {
-                delete pop;
-                pop = nullptr;
-            }
+        ~Node() {
+            next = nullptr;
+            prev = nullptr;
         }
     };
 
 private:
-    wezel_listy* glowa;
-    wezel_listy* ogon;
-    unsigned dlugosc;
+    Node* head = new Node();
+    Node* tail = new Node();
+    unsigned length;
 
 public:
-    lista_dwukierunkowa() noexcept
-        : glowa(nullptr), ogon(nullptr), dlugosc(0) {
+    doubly_linked_list() noexcept
+        : head(nullptr), tail(nullptr), length(0) {
 
     }
 
-    ~lista_dwukierunkowa() {
-        if (glowa) {
-            delete glowa;
-            glowa = nullptr;
-            dlugosc = 0;
+    ~doubly_linked_list() {
+        if (head) {
+            delete(head);
         }
-        
-        if (ogon) {
-            delete ogon;
-            ogon = nullptr;
-            dlugosc = 0;
+        if (tail) {
+            delete(tail);
         }
     }
 
-    unsigned pobierz_dlugosc() const noexcept {
-        return dlugosc;
+    unsigned getLength() const noexcept {
+        return length;
     }
 
     //b)
-    void wstaw_na_poczatek(const T& dane) {
-        glowa = new wezel_listy(dane, glowa); //nowa glowa
-        ++dlugosc;
+    void push(const T& data) {
+        if (length == 0) {
+            head = new Node(data, head);
+            tail = new Node(data, nullptr, head);
+        }
+        else if (length == 1) {
+            head = new Node(data, tail);
+            tail->prev = head;
+        }
+        
+        head = new Node(data, head);
+        head->next->prev = head;
+        
+        ++length;
     }
 
     // a)
-    void wstaw_na_koniec(const T& dane) {
+    void append(const T& data) {
 
-        if (glowa == nullptr) {
-            wstaw_na_poczatek(dane);
+        if (head == nullptr) {
+            push(data);
             return;
         }
 
-        ogon = new wezel_listy(dane); //nowy ogon
-        wezel_listy* temp = glowa;
+        Node* temp = tail;
+        if (length == 1) {
+            tail = new Node(data, nullptr, head);
+            head->next = tail;
 
-        while (temp->nast != nullptr) {
-            temp = temp->nast;
+            ++length;
+            return;
         }
-        //temp->nast->pop = temp->nast;
-        temp->nast = ogon;
-        ogon->pop = temp;
-        ++dlugosc;
+        
+        tail = new Node(data, nullptr, tail);
+        tail->prev->next = tail;
+        
+        ++length;
     }
 
     // d)
-    void usun_glowe() {
-        wezel_listy* usun = glowa;
+    void deleteHead() {
+        Node* usun = head;
 
-        if (glowa == nullptr ) {
+        if (head == nullptr) {
             throw std::domain_error("Proba usuniecia nieistniejacego elementu");
         }
 
-        if (dlugosc == 1) {
-            delete ogon;
-            ogon = nullptr;
-        }
-        
-        glowa = usun->nast;
+        head = usun->next;
 
-        if (usun->nast != nullptr) {
-            usun->nast->pop = usun->pop;
-        }
+        if (usun->next != nullptr)
+            usun->next->prev = usun->prev;
 
-        delete usun;
+        length--;
+
         usun = nullptr;
-
-        dlugosc--;
+        return;
     }
     // c)
-    void usun_ogon() {
-        wezel_listy* usun = ogon;
+    void deleteTail() {
+        Node* usun = tail;
 
-        if (ogon == nullptr) {
+        if (tail == nullptr) {
             throw std::domain_error("Proba usuniecia nieistniejacego elementu");
         }
 
-        if (dlugosc == 1){
-            delete glowa;
-            glowa = nullptr;
-        }
+        tail = usun->prev;
 
-        ogon = usun->pop;
-
-        if (usun->pop != nullptr) {
-            usun->pop->nast = usun->nast;
-        }
-
-        delete usun;
-        usun = nullptr;
+        if (usun->prev != nullptr)
+            usun->prev->next = usun->next;
         
-        dlugosc--;
+        length--;
+
+        usun = nullptr;
+        return;
     }
 
     // e)
-    T zwroc_wartosc(unsigned index) {
-        if (index <= dlugosc) {
-            wezel_listy* temp = glowa;
+    T returnValue(unsigned index) {
+        if (index <= length) {
+            Node* temp = head;
 
-            for (auto i = 0; i < index; i++) {
-                temp = temp->nast;
+            for (unsigned i = 0; i < index; i++) {
+                temp = temp->next;
             }
 
-            return temp->dane;
+            return temp->data;
         }
         else {
             throw std::domain_error("Proba wywolania nieistniejacego elementu.");
@@ -153,24 +144,23 @@ public:
 
     // g)
     template<typename Comp>
-    wezel_listy* znajdz_element(const T& el, Comp comp) const
-    {
-        for (auto p = glowa; p; p = p->nast)
-            if (comp(el, p->dane))
+    Node* findElement(const T& el, Comp comp) const{
+        for (auto p = head; p; p = p->next)
+            if (comp(el, p->data))
                 return p;
         return nullptr;
     }
 
     // f)
-    void podmien(unsigned index, const T& dane) {
-        if (index <= dlugosc) {
-            wezel_listy* temp = glowa;
+    void insertAtIndex(unsigned index, const T& data) {
+        if (index <= length) {
+            Node* temp = head;
 
-            for (auto i = 0; i < index; i++) {
-                temp = temp->nast;
+            for (unsigned i = 0; i < index; i++) {
+                temp = temp->next;
             }
 
-            temp->dane = dane;
+            temp->data = data;
         }
         else {
             throw std::domain_error("Proba wywolania nieistniejacego elementu.");
@@ -180,43 +170,103 @@ public:
 
     // h)
     template<typename Comp>
-    void usun_element(const T& el, Comp comp) const{
-        bool flag = false;
-        for (auto p = glowa; p; p = p->nast)
-            if (comp(el, p->dane)){
-                delete p;
-                p = nullptr;
-                flag = true;
-                std::cout << "Element usuniety z powodzeniem\n";
+    void find_and_remove(const T& el, Comp comp){
+        for (auto p = head; p; p = p->next)
+            if (comp(el, p->data)) {
+                if (p == head){
+                    deleteHead();
+                }
+                else if (p == tail) {
+                    deleteTail();
+                }
+                else {
+                    if (p->prev) p->prev->next = p->next;
+                    if (p->next) p->next->prev = p->prev;
+                    p = nullptr;
+                    length--;
+                }
+                //std::cout << "Element usuniety z powodzeniem\n";
+                return;
             }
-        if (flag == false)
-            std::cout << "Nie udalo sie usunac tego elementu\n";
+        //std::cout << "Nie udalo sie usunac tego elementu\n";
+        return;
     }
 
     // i)
     template<typename Comp>
-    void wstaw_porzadek(const T& el, Comp comp) const {
-        bool flag = false;
-        for (auto p = glowa; p; p = p->nast)
-            if (comp(el, p->dane)){
-                p = new wezel_listy(el, p);
-                flag = true;
-                std::cout << "Element dodany z powodzeniem\n";
-                break;
+    void insertByComp(const T& el, Comp comp) {
+        if (length == 0) {
+            push(el);
+            //std::cout << "Element dodany z powodzeniem\n";
+        }
+        for (auto p = head; p; p = p->next)
+            if (comp(el, p->data)){
+                if (p == head) {
+                    push(el);
+                }
+                else {
+                    Node* nowyWezel = new Node(el, p, p->prev);
+                    p->prev->next = nowyWezel;
+                    p->prev = nowyWezel;
+                    length++;
+                }
+                //std::cout << "Element dodany z powodzeniem\n";
+                return;
             }
-        if (flag == false)
-            std::cout << "Nie udalo sie dodac tego elementu\n";
+        append(el);
+        //std::cout << "Element dodany z powodzeniem\n";
+    }
+
+    // j)
+    void clear() {
+        Node* temp;
+
+        while (head != nullptr) {
+            temp = head;
+            head = head->next;
+            temp = nullptr;
+        }
+        length = 0;
+        return;
     }
 
     // k)
-    std::string to_string() const
-    {
-        if (dlugosc == 0)
+    std::string to_string() const{
+        if (length == 0)
             return "[]";
         std::ostringstream str; // pamiętaj o #include <sstream>
-        str << "[" << glowa->dane;
-        for (auto p = glowa->nast; p; p = p->nast)
-            str << ", " << p->dane;
+        str << "[" << head->data;
+        for (auto p = head->next; p; p = p->next)
+            str << ", " << p->data;
+        str << "]";
+        return str.str(); // wydobycie napisu ze strumienia
+    }
+
+    std::string border_to_string() const {
+        if (length == 0)
+            return "[]";
+        std::ostringstream str; // pamiętaj o #include <sstream>
+        str << "[" << head->data;
+        if (length <= 12)
+            for (auto p = head->next; p; p = p->next)
+                str << ", " << p->data;
+        else {
+            auto p = head->next;
+            for (int i = 0; i <= 5; i++) {
+                str << ", " << p->data;
+                p = p->next;
+            }
+            str << ", ...";
+            p = tail;
+            for (int i = 0; i <= 5; i++) {
+                p = p->prev;
+            }
+
+            for (int i = 0; i <= 5; i++) {
+                str << ", " << p->data;
+                p = p->next;
+            }
+        }
         str << "]";
         return str.str(); // wydobycie napisu ze strumienia
     }
@@ -241,15 +291,72 @@ std::ostream& operator<< (std::ostream& out, const some_class& obj)
 
 int main()
 {
-    lista_dwukierunkowa<some_class> lista;
-    
-    lista.wstaw_na_koniec(some_class{123});
-    lista.wstaw_na_poczatek(some_class{ 'a' });
-    std::cout << lista.zwroc_wartosc(0) << "\n";
-    std::cout << lista.to_string() << "\n";
-    lista.podmien(1, some_class{ 1234 });
-    std::cout << lista.to_string() << "\n";
+    auto kompLess = [](const some_class& a, const some_class& b) {
+        return a.some_int < b.some_int;
+    };
 
+    auto kompEq = [](const some_class& a, const some_class& b) {
+        return a.some_int == b.some_int;
+    };
+
+    //doubly_linked_list<some_class>* list = new doubly_linked_list<some_class>;
+    //list->append(some_class{123});
+    //list->push(some_class{'a'});
+
+    //std::cout << list->returnValue(0) << "\n";
+
+    //std::cout << list->to_string() << "\n";
+
+    //list->insertAtIndex(1, some_class{ 1234 });
+    //std::cout << list->to_string() << "\n";
+
+    //list->insertByComp(some_class{ 100 }, kompLess); // wstawienie z zachowaniem porządku
+    //std::cout << list->to_string() << "\n";
+
+    //list->find_and_remove(some_class{ 1234 }, kompEq);
+    //std::cout << list->to_string() << "\n";
+
+    //std::cout << list->findElement(some_class{ 100 }, kompEq) << "\n";
+    //std::cout << list->to_string() << "\n";
+
+    //for (int i = 101; i <= 110; i++)
+    //    list->append(some_class{ i });
+    //std::cout << list->to_string() << "\n";
+
+    //list->clear();
+    //std::cout << list->to_string() << "\n";
+
+    const int MAX_ORDER = 6;
+    doubly_linked_list<some_class>* ll = new doubly_linked_list<some_class>();
+    for (int o = 1; o <= MAX_ORDER; o++) {
+        const int n = pow(10, o); // rozmiar danych
+
+        clock_t t1 = clock();
+        for (int i = 0; i < n; i++) {
+            some_class so = some_class{ i };
+            ll->append(so);
+        }
+        clock_t t2 = clock();
+        
+        double mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
+        std::cout << ll->border_to_string() << "\nPomiar 1, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff/n << "ms\n\n";
+
+        const int m = pow(10, 4);
+        
+        t1 = clock();
+        for (int i = 0; i < m; i++) {
+            some_class so = some_class{ i };
+            ll->find_and_remove(so, kompEq);
+            so = some_class{NULL};
+        }
+
+        t2 = clock();
+        mstimediff = 1000 * (t2 - t1) / (double)CLOCKS_PER_SEC;
+        std::cout << ll->border_to_string() << "\nPomiar 2, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff / n << "ms\n\n";
+
+        ll->clear();
+    }
+    delete ll;
 
     return 0;
 }
