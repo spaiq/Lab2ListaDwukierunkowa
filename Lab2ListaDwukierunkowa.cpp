@@ -129,7 +129,7 @@ public:
 
     // e)
     T returnValue(unsigned index) {
-        if (index <= length) {
+        if (index < length) {
             Node* temp = head;
 
             for (unsigned i = 0; i < index; i++) {
