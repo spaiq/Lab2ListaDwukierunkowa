@@ -43,13 +43,14 @@ public:
         if (tail) {
             delete(tail);
         }
+        length = 0;
     }
 
     unsigned getLength() const noexcept {
         return length;
     }
 
-    //b)
+    // b)
     void push(const T& data) {
         if (length == 0) {
             head = new Node(data, head);
@@ -267,24 +268,21 @@ public:
                 p = p->next;
             }
         }
-        str << "]";
+        str << "] dlugosc: " << length;
         return str.str(); // wydobycie napisu ze strumienia
     }
 
 
 };
 
-
 struct some_class {
     int some_int;
     bool operator== (const some_class& obj) const {
         return some_int == obj.some_int;
     };
-
 };
 
-std::ostream& operator<< (std::ostream& out, const some_class& obj)
-{
+std::ostream& operator<< (std::ostream& out, const some_class& obj){
     out << obj.some_int;
     return out;
 }
@@ -330,10 +328,12 @@ int main()
     doubly_linked_list<some_class>* ll = new doubly_linked_list<some_class>();
     for (int o = 1; o <= MAX_ORDER; o++) {
         const int n = pow(10, o); // rozmiar danych
+        srand(time(NULL));
 
         clock_t t1 = clock();
         for (int i = 0; i < n; i++) {
-            some_class so = some_class{ i };
+            int random = rand() % 10001;
+            some_class so = some_class{ random };
             ll->append(so);
         }
         clock_t t2 = clock();
@@ -345,7 +345,8 @@ int main()
         
         t1 = clock();
         for (int i = 0; i < m; i++) {
-            some_class so = some_class{ i };
+            int random = rand() % 10001;
+            some_class so = some_class{ random };
             ll->find_and_remove(so, kompEq);
             so = some_class{NULL};
         }
@@ -356,7 +357,7 @@ int main()
 
         ll->clear();
     }
-    delete ll;
 
+    delete ll;
     return 0;
 }
