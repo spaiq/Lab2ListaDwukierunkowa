@@ -53,10 +53,6 @@ public:
             head = new Node(data, tail);
             tail = head;
         }
-        /*else if (length == 1) {
-            head = new Node(data, tail);
-            tail->prev = head;
-        }*/
         else {
             head = new Node(data, head);
             head->next->prev = head;
@@ -73,14 +69,6 @@ public:
             push(data);
             return;
         }
-
-        /*if (length == 1) {
-            tail = new Node(data, nullptr, head);
-            head->next = tail;
-
-            ++length;
-            return;
-        }*/
         
         tail = new Node(data, nullptr, tail);
         tail->prev->next = tail;
@@ -184,10 +172,10 @@ public:
                 delete p;
                 length--;
             }
-            //std::cout << "Element usuniety z powodzeniem\n";
+            //Element usuniety z powodzeniem
             return true;
         }
-        //std::cout << "Nie udalo sie usunac tego elementu\n";
+        //Nie udalo sie usunac tego elementu
         return false;
     }
     
@@ -196,7 +184,6 @@ public:
     void insertByComp(const T& el, Comp comp) {
         if (length == 0 || comp(el, head->data)) {
             push(el);
-            //std::cout << "Element dodany z powodzeniem\n";
         }
         else if (comp(tail->data, el)) {
             append(el);
@@ -208,11 +195,9 @@ public:
                     p->prev->next = nowyWezel;
                     p->prev = nowyWezel;
                     length++;
-                    //std::cout << "Element dodany z powodzeniem\n";
                     return;
                 }
         }
-        //std::cout << "Element dodany z powodzeniem\n";
     }
 
     // j)
