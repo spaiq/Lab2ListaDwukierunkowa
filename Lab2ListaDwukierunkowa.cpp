@@ -75,7 +75,6 @@ public:
             return;
         }
 
-        Node* temp = tail;
         if (length == 1) {
             tail = new Node(data, nullptr, head);
             head->next = tail;
