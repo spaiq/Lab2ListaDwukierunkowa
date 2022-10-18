@@ -1,4 +1,7 @@
-﻿#include <iostream>
+﻿//ALGO2 IS1 222A LAB01
+//Bartłomiej Juszczyk
+//jb50996@zut.edu.pl
+#include <iostream>
 #include <sstream>
 #include <time.h>
 
@@ -26,8 +29,8 @@ public:
     };
 
 private:
-    Node* head = new Node();
-    Node* tail = new Node();
+    Node* head;
+    Node* tail;
     unsigned length;
 
 public:
@@ -37,13 +40,7 @@ public:
     }
 
     ~doubly_linked_list() {
-        if (head) {
-            delete(head);
-        }
-        if (tail) {
-            delete(tail);
-        }
-        length = 0;
+        clear();
     }
 
     unsigned getLength() const noexcept {
@@ -54,12 +51,12 @@ public:
     void push(const T& data) {
         if (length == 0) {
             head = new Node(data, tail);
-            tail = new Node(data, nullptr, head);
+            tail = head;
         }
-        else if (length == 1) {
+        /*else if (length == 1) {
             head = new Node(data, tail);
             tail->prev = head;
-        }
+        }*/
         else {
             head = new Node(data, head);
             head->next->prev = head;
@@ -77,13 +74,13 @@ public:
             return;
         }
 
-        if (length == 1) {
+        /*if (length == 1) {
             tail = new Node(data, nullptr, head);
             head->next = tail;
 
             ++length;
             return;
-        }
+        }*/
         
         tail = new Node(data, nullptr, tail);
         tail->prev->next = tail;
@@ -101,12 +98,12 @@ public:
 
         head = usun->next;
 
-        if (usun->next != nullptr)
-            usun->next->prev = usun->prev;
+        if (head != nullptr)
+            head->prev = nullptr;
 
         length--;
 
-        usun = nullptr;
+        delete usun;
         return;
     }
     // c)
@@ -119,17 +116,17 @@ public:
 
         tail = usun->prev;
 
-        if (usun->prev != nullptr)
-            usun->prev->next = usun->next;
+        if (tail != nullptr)
+            tail->next = nullptr;
         
         length--;
 
-        usun = nullptr;
+        delete usun;
         return;
     }
 
     // e)
-    T returnValue(unsigned index) {
+    T& returnValue(unsigned index) {
         if (index < length) {
             Node* temp = head;
 
@@ -155,7 +152,7 @@ public:
 
     // f)
     void insertAtIndex(unsigned index, const T& data) {
-        if (index <= length) {
+        if (index < length) {
             Node* temp = head;
 
             for (unsigned i = 0; i < index; i++) {
@@ -172,50 +169,49 @@ public:
 
     // h)
     template<typename Comp>
-    void find_and_remove(const T& el, Comp comp){
-        for (auto p = head; p; p = p->next)
-            if (comp(el, p->data)) {
-                if (p == head){
-                    deleteHead();
-                }
-                else if (p == tail) {
-                    deleteTail();
-                }
-                else {
-                    if (p->prev) p->prev->next = p->next;
-                    if (p->next) p->next->prev = p->prev;
-                    p = nullptr;
-                    length--;
-                }
-                //std::cout << "Element usuniety z powodzeniem\n";
-                return;
+    bool find_and_remove(const T& el, Comp comp){
+        Node* p = findElement(el, comp);
+        if (p) {
+            if (p == head) {
+                deleteHead();
             }
+            else if (p == tail) {
+                deleteTail();
+            }
+            else {
+                if (p->prev) p->prev->next = p->next;
+                if (p->next) p->next->prev = p->prev;
+                delete p;
+                length--;
+            }
+            //std::cout << "Element usuniety z powodzeniem\n";
+            return true;
+        }
         //std::cout << "Nie udalo sie usunac tego elementu\n";
-        return;
+        return false;
     }
-
+    
     // i)
     template<typename Comp>
     void insertByComp(const T& el, Comp comp) {
-        if (length == 0) {
+        if (length == 0 || comp(el, head->data)) {
             push(el);
             //std::cout << "Element dodany z powodzeniem\n";
         }
-        for (auto p = head; p; p = p->next)
-            if (comp(el, p->data)){
-                if (p == head) {
-                    push(el);
-                }
-                else {
+        else if (comp(tail->data, el)) {
+            append(el);
+        }
+        else {
+            for (auto p = head->next; p; p = p->next)
+                if (comp(el, p->data)) {
                     Node* nowyWezel = new Node(el, p, p->prev);
                     p->prev->next = nowyWezel;
                     p->prev = nowyWezel;
                     length++;
+                    //std::cout << "Element dodany z powodzeniem\n";
+                    return;
                 }
-                //std::cout << "Element dodany z powodzeniem\n";
-                return;
-            }
-        append(el);
+        }
         //std::cout << "Element dodany z powodzeniem\n";
     }
 
@@ -226,7 +222,7 @@ public:
         while (head != nullptr) {
             temp = head;
             head = head->next;
-            temp = nullptr;
+            delete temp;
         }
         length = 0;
         return;
@@ -329,14 +325,16 @@ int main()
 
     const int MAX_ORDER = 6;
     doubly_linked_list<some_class>* ll = new doubly_linked_list<some_class>();
+    srand(time(NULL));
     for (int o = 1; o <= MAX_ORDER; o++) {
         const int n = pow(10, o); // rozmiar danych
-        srand(time(NULL));
-
+        int random;
+        char randomChar;
         clock_t t1 = clock();
         for (int i = 0; i < n; i++) {
-            int random = rand() % 10001;
-            some_class so = some_class{ random };
+            random = rand() % 10001;
+            randomChar = 'a' + rand() % 26;
+            some_class so = some_class{ random , randomChar};
             ll->append(so);
         }
         clock_t t2 = clock();
@@ -345,11 +343,11 @@ int main()
         std::cout << ll->border_to_string() << "\nPomiar 1, rzedu " << o << "\nCzas calkowity: " << mstimediff << "ms\nCzas w przeliczeniu na jedna operacje: " << mstimediff/n << "ms\n\n";
 
         const int m = pow(10, 4);
-        
         t1 = clock();
         for (int i = 0; i < m; i++) {
-            int random = rand() % 10001;
-            some_class so = some_class{ random };
+            random = rand() % 10001;
+            randomChar = 'a' + rand() % 26;
+            some_class so = some_class{ random , randomChar};
             ll->find_and_remove(so, kompEq);
             so = some_class{NULL};
         }
