@@ -1,10 +1,16 @@
-﻿//ALGO2 IS1 222A LAB01
-//Bartłomiej Juszczyk
-//jb50996@zut.edu.pl
+﻿/******************************
+* @author Bartłomiej Juszczyk
+*
+******************************/
+
 #include <iostream>
 #include <sstream>
 #include <time.h>
 
+/*******************************
+* Class representing a doubly linked list 
+*
+********************************/
 template<typename T>
 class doubly_linked_list {
 public:
@@ -47,7 +53,6 @@ public:
         return length;
     }
 
-    // b)
     void push(const T& data) {
         if (length == 0) {
             head = new Node(data, tail);
@@ -62,7 +67,6 @@ public:
         return;
     }
 
-    // a)
     void append(const T& data) {
 
         if (head == nullptr) {
@@ -76,12 +80,11 @@ public:
         ++length;
     }
 
-    // d)
     void deleteHead() {
         Node* usun = head;
 
         if (head == nullptr) {
-            throw std::domain_error("Proba usuniecia nieistniejacego elementu");
+            throw std::domain_error("Cannot delete a non-existing element");
         }
 
         head = usun->next;
@@ -94,12 +97,12 @@ public:
         delete usun;
         return;
     }
-    // c)
+
     void deleteTail() {
         Node* usun = tail;
 
         if (tail == nullptr) {
-            throw std::domain_error("Proba usuniecia nieistniejacego elementu");
+            throw std::domain_error("Cannot delete a non-existing element");
         }
 
         tail = usun->prev;
@@ -113,7 +116,7 @@ public:
         return;
     }
 
-    // e)
+
     T& returnValue(unsigned index) {
         if (index < length) {
             Node* temp = head;
@@ -125,11 +128,11 @@ public:
             return temp->data;
         }
         else {
-            throw std::domain_error("Proba wywolania nieistniejacego elementu.");
+            throw std::domain_error("Cannot return a non-existing element.");
         }
     }
 
-    // g)
+
     template<typename Comp>
     Node* findElement(const T& el, Comp comp) const{
         for (auto p = head; p; p = p->next)
@@ -138,7 +141,6 @@ public:
         return nullptr;
     }
 
-    // f)
     void insertAtIndex(unsigned index, const T& data) {
         if (index < length) {
             Node* temp = head;
@@ -150,12 +152,11 @@ public:
             temp->data = data;
         }
         else {
-            throw std::domain_error("Proba wywolania nieistniejacego elementu.");
+            throw std::domain_error("Cannot insert at a non-existing index.");
         }
     }
 
 
-    // h)
     template<typename Comp>
     bool find_and_remove(const T& el, Comp comp){
         Node* p = findElement(el, comp);
@@ -172,14 +173,13 @@ public:
                 delete p;
                 length--;
             }
-            //Element usuniety z powodzeniem
+            // The element was removed successfully
             return true;
         }
-        //Nie udalo sie usunac tego elementu
+        // The element was not removed successfully
         return false;
     }
     
-    // i)
     template<typename Comp>
     void insertByComp(const T& el, Comp comp) {
         if (length == 0 || comp(el, head->data)) {
@@ -191,16 +191,15 @@ public:
         else {
             for (auto p = head->next; p; p = p->next)
                 if (comp(el, p->data)) {
-                    Node* nowyWezel = new Node(el, p, p->prev);
-                    p->prev->next = nowyWezel;
-                    p->prev = nowyWezel;
+                    Node* newNode = new Node(el, p, p->prev);
+                    p->prev->next = newNode;
+                    p->prev = newNode;
                     length++;
                     return;
                 }
         }
     }
 
-    // j)
     void clear() {
         Node* temp;
 
@@ -213,22 +212,24 @@ public:
         return;
     }
 
-    // k)
+    // Function that prints the whole list in a string
     std::string to_string() const{
         if (length == 0)
             return "[]";
-        std::ostringstream str; // pamiętaj o #include <sstream>
+        std::ostringstream str;
         str << "[" << head->data;
         for (auto p = head->next; p; p = p->next)
             str << ", " << p->data;
         str << "]";
-        return str.str(); // wydobycie napisu ze strumienia
+        return str.str();
     }
 
+    // Function that prints only first and last elements
+    // if the list is longer than 12 elements
     std::string border_to_string() const {
         if (length == 0)
             return "[]";
-        std::ostringstream str; // pamiętaj o #include <sstream>
+        std::ostringstream str;
         str << "[" << head->data;
         if (length <= 12)
             for (auto p = head->next; p; p = p->next)
@@ -251,7 +252,7 @@ public:
             }
         }
         str << "] dlugosc: " << length;
-        return str.str(); // wydobycie napisu ze strumienia
+        return str.str();
     }
 
 
@@ -271,13 +272,15 @@ std::ostream& operator<< (std::ostream& out, const some_class& obj){
     return out;
 }
 
+
+// Example of usage
 int main()
 {
-    auto kompLess = [](const some_class& a, const some_class& b) {
+    auto compLess = [](const some_class& a, const some_class& b) {
         return a.some_int < b.some_int;
     };
 
-    auto kompEq = [](const some_class& a, const some_class& b) {
+    auto compEq = [](const some_class& a, const some_class& b) {
         return a.some_int == b.some_int;
     };
 
@@ -292,13 +295,13 @@ int main()
     //list->insertAtIndex(1, some_class{ NULL , 'c' });
     //std::cout << list->to_string() << "\n";
 
-    //list->insertByComp(some_class{ 100}, kompLess); // wstawienie z zachowaniem porządku
+    //list->insertByComp(some_class{ 100}, compLess); // wstawienie z zachowaniem porządku
     //std::cout << list->to_string() << "\n";
 
-    //list->find_and_remove(some_class{NULL, 'c' }, kompEq);
+    //list->find_and_remove(some_class{NULL, 'c' }, compEq);
     //std::cout << list->to_string() << "\n";
 
-    //std::cout << list->findElement(some_class{ 100 }, kompEq) << "\n";
+    //std::cout << list->findElement(some_class{ 100 }, compEq) << "\n";
     //std::cout << list->to_string() << "\n";
 
     //for (int i = 101; i <= 110; i++)
@@ -333,7 +336,7 @@ int main()
             random = rand() % 10001;
             randomChar = 'a' + rand() % 26;
             some_class so = some_class{ random , randomChar};
-            ll->find_and_remove(so, kompEq);
+            ll->find_and_remove(so, compEq);
             so = some_class{NULL};
         }
 
